@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Document Lab - SSC Parser</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fa; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        .header {
+            background: #1976d2; color: white; padding: 12px 20px; display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: bold;
+        }
+        .header .logo { background: white; color: #1976d2; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Sidebar - Document Lab */
+        .left-sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .choose-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .clear-btn {
+            color: #d32f2f;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .scanned-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .doc-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .doc-item:hover, .doc-item.active {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+        }
+
+        /* Middle - Main Content */
+        .middle-content {
+            flex: 1;
+            background: #ffffff;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #888;
+        }
+        .middle-content h3 { margin-bottom: 10px; }
+
+        /* Right - AI Inspector */
+        .right-sidebar {
+            width: 380px;
+            background: white;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        .ai-header {
+            padding: 15px 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .prompt-box {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+        .prompt-box textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+            font-size: 14px;
+        }
+        .action-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .send-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .stop-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">A</div>
+        <div>Document Lab - SSC AI Parser</div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="sidebar-header">
+                <button class="choose-btn" onclick="document.getElementById('fileInput').click()">
+                    + Choose Files
+                </button>
+                <input type="file" id="fileInput" multiple accept=".pdf,.txt" style="display:none;" onchange="handleFiles(this)">
+                <span class="clear-btn" onclick="clearAllData()">Clear All Data</span>
+            </div>
+
+            <div style="padding: 0 20px 10px; font-size:13px; color:#666;">SCANNED DOCUMENTS</div>
+            <div class="scanned-list" id="scannedList">
+                <!-- Files dynamically add honge -->
+            </div>
+        </div>
+
+        <!-- Middle Content -->
+        <div class="middle-content" id="middleContent">
+            <img src="https://via.placeholder.com/80x100/eeeeee/aaaaaa?text=PDF" alt="PDF" style="opacity:0.6;">
+            <h3>Select a PDF to view content</h3>
+            <p>Upload or select a file to start analyzing questions</p>
+        </div>
+
+        <!-- Right AI Inspector -->
+        <div class="right-sidebar">
+            <div class="ai-header">
+                <span>AI INSPECTOR</span>
+                <span onclick="clearChat()" style="cursor:pointer; color:#1976d2; font-size:14px;">CLEAR CHAT</span>
+            </div>
+            <div class="chat-area" id="chatArea">
+                <p style="color:#888; text-align:center; margin-top:100px;">
+                    Upload or select a file to start.<br>
+                    Ask anything about this document...
+                </p>
+            </div>
+            <div class="prompt-box">
+                <textarea id="userPrompt" placeholder="Ask anything about this document... (यह prompt सभी questions पर apply होगा)"></textarea>
+                <div class="action-buttons">
+                    <button class="send-btn" onclick="sendPromptToAll()">Send Prompt</button>
+                    <button class="stop-btn" onclick="stopAI()">Stop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let documents = {};
+
+        function handleFiles(input) {
+            const files = input.files;
+            if (!files.length) return;
+
+            const listContainer = document.getElementById('scannedList');
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    documents[file.name] = e.target.result;
+
+                    const div = document.createElement('div');
+                    div.className = 'doc-item';
+                    div.innerHTML = `📄 ${file.name}`;
+                    div.onclick = () => loadDocument(file.name);
+                    listContainer.appendChild(div);
+                };
+                reader.readAsText(file);   // PDF ke liye baad mein pdf.js use kar sakte hain
+            }
+
+            alert(`${files.length} document(s) added to scanned list!`);
+        }
+
+        function loadDocument(filename) {
+            const content = documents[filename];
+            const middle = document.getElementById('middleContent');
+
+            middle.innerHTML = `<h2 style="margin-bottom:20px;">${filename}</h2>`;
+
+            // Basic parsing for SSC questions
+            if (content) {
+                const blocks = content.split(/(?=Q\.\s*0?\d+)/);
+                let html = "";
+
+                blocks.forEach(block => {
+                    const match = block.match(/Q\.\s*0?(\d+)/);
+                    if (!match) return;
+                    const qNum = parseInt(match[1]);
+
+                    let qText = block.split(/Ans\s+1\./i)[0] || block;
+                    html += `
+                        <div style="background:white; border:1px solid #ddd; border-radius:10px; padding:18px; margin-bottom:18px;">
+                            <strong>प्रश्न ${qNum}</strong><br><br>
+                            ${qText.replace(/\n/g, '<br>')}
+                        </div>`;
+                });
+
+                middle.innerHTML += html || "<p>No questions parsed yet.</p>";
+            }
+        }
+
+        function sendPromptToAll() {
+            const prompt = document.getElementById('userPrompt').value.trim();
+            if (!prompt) return alert("Prompt लिखें!");
+
+            const chat = document.getElementById('chatArea');
+            chat.innerHTML += `<p><strong>You:</strong> ${prompt}</p>`;
+            chat.innerHTML += `<p><strong>AI:</strong> Prompt सभी selected documents/questions पर apply हो रहा है...</p>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function stopAI() {
+            const chat = document.getElementById('chatArea');
+            chat.innerHTML += `<p style="color:#d32f2f;">Processing stopped by user.</p>`;
+        }
+
+        function clearAllData() {
+            if (confirm("सभी documents clear करें?")) {
+                documents = {};
+                document.getElementById('scannedList').innerHTML = '';
+                document.getElementById('middleContent').innerHTML = `
+                    <img src="https://via.placeholder.com/80x100/eeeeee/aaaaaa?text=PDF" alt="PDF" style="opacity:0.6;">
+                    <h3>Select a PDF to view content</h3>
+                `;
+            }
+        }
+
+        function clearChat() {
+            document.getElementById('chatArea').innerHTML = `<p style="color:#888; text-align:center;">Chat cleared.</p>`;
+        }
+    </script>
+</body>
+</html>
