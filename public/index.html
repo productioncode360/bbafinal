@@ -194,7 +194,8 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-directi
 
 <script>
 var BE = '';
-var subs = {}, actSub = null, connIds = new Set(), busy = false, stopSig = false, hist = [], sbActSub = null;
+var subs = {}, actSub = null, connId = null, busy = false, stopSig = false, hist = [], sbActSub = null;
+// ^^^^ connId = single ID (Set ki jagah ek string) — FIX #1
 var tTimer;
 
 /* ─── Toast ─── */
@@ -277,7 +278,7 @@ function renderSList() {
 }
 
 function selSub(nm) {
-  actSub = nm; connIds = new Set(); hist = [];
+  actSub = nm; connId = null; hist = [];
   renderSList(); renderQList();
   document.getElementById('qpTtl').textContent = icon(nm) + ' ' + nm;
   document.getElementById('btnUp').disabled = false;
@@ -316,7 +317,6 @@ async function onImg(ev) {
         newQs.push(q);
         added++;
       });
-      // DB mein save karo
       if (newQs.length) {
         await fetch(BE + '/api/subjects/' + encodeURIComponent(actSub) + '/questions', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -352,7 +352,8 @@ function renderQList() {
   el.innerHTML = '';
   qs.forEach(function (q, i) {
     var d = document.createElement('div');
-    var cls = 'qrow' + (connIds.has(q.id) ? ' conn' : '') + (q.ans ? ' answered' : '');
+    // FIX #1: connId (single) se compare karo, Set nahi
+    var cls = 'qrow' + (connId === q.id ? ' conn' : '') + (q.ans ? ' answered' : '');
     d.className = cls;
     d.innerHTML = '<span class="qnum">' + (i + 1) + '</span><span class="qtxt">' + e(q.text) + '</span>';
     d.onclick = function () { togConn(q.id); };
@@ -361,23 +362,37 @@ function renderQList() {
   updCtrl();
 }
 
+/* ─── FIXED togConn: Single select only ─── */
 function togConn(id) {
   var q = getQ(id);
-  if (connIds.has(id)) { connIds.delete(id); addBbl('ai', 'Disconnected: "' + q.text.slice(0, 40) + '"'); }
-  else { connIds.add(id); addBbl('ai', 'Connected: "' + q.text.slice(0, 50) + '"'); }
+  if (connId === id) {
+    // Same question dobara click = disconnect
+    connId = null;
+    addBbl('ai', 'Disconnected: "' + q.text.slice(0, 40) + '"');
+  } else {
+    // Naya question click = purana auto-disconnect, naya connect
+    connId = id;
+    addBbl('ai', 'Connected: "' + q.text.slice(0, 50) + '"');
+  }
   renderQList(); updCtrl();
 }
 
 function getQ(id) { return actSub && subs[actSub] ? subs[actSub].qs.find(function (q) { return q.id === id; }) : null; }
-function connQs() { return actSub ? subs[actSub].qs.filter(function (q) { return connIds.has(q.id); }) : []; }
+
+// FIXED: connId single value se connected question
+function connQs() {
+  if (!actSub || !connId) return [];
+  var q = getQ(connId);
+  return q ? [q] : [];
+}
 
 function updCtrl() {
-  var n = connIds.size;
+  var n = connId ? 1 : 0;
   document.getElementById('cc').textContent = n;
   document.getElementById('bSend').disabled = n === 0;
   document.getElementById('bOne').disabled = n === 0;
   document.getElementById('bAll').disabled = !actSub || !subs[actSub] || !subs[actSub].qs.length;
-  document.getElementById('hint').textContent = n > 0 ? n + ' connected — prompt do!' : 'Question pe click karo';
+  document.getElementById('hint').textContent = n > 0 ? '1 connected — prompt do!' : 'Question pe click karo';
 }
 
 async function doSend() {
@@ -390,15 +405,25 @@ async function doSend() {
   addBbl('user', p); await process(qs, p);
 }
 
+/* ─── FIXED doAll: Sirf unanswered questions process karo ─── */
 async function doAll() {
   if (busy) return;
   var p = document.getElementById('cinp').value.trim();
   if (!p) { toast('Prompt likho!', 'warn'); return; }
   if (!actSub || !subs[actSub].qs.length) { toast('Questions nahi!', 'warn'); return; }
+
+  // FIX #2: Only unanswered filter karo
+  var unanswered = subs[actSub].qs.filter(function (q) { return !q.ans; });
+
+  if (!unanswered.length) {
+    toast('Sab questions ke ans already aa chuke hain! ✅', 'ok', 4000);
+    return;
+  }
+
   document.getElementById('cinp').value = '';
   addBbl('user', p);
-  addBbl('ai', 'ALL — ' + subs[actSub].qs.length + ' questions...');
-  await process(subs[actSub].qs, p);
+  addBbl('ai', 'ALL (unanswered only) — ' + unanswered.length + ' questions process honge, ' + (subs[actSub].qs.length - unanswered.length) + ' already answered skip ho gaye ✅');
+  await process(unanswered, p);
 }
 
 async function process(qs, p) {
@@ -412,7 +437,6 @@ async function process(qs, p) {
       var ans = await callAI(q, p);
       var tel = document.getElementById(tid); if (tel) tel.remove();
       q.ans = ans;
-      // DB mein answer save karo
       await saveAnswer(actSub, q.id, ans);
       showAns(q.text, ans);
       addBbl('ai', 'Q' + (i + 1) + ' done. ✅ Saved!');
@@ -425,7 +449,6 @@ async function process(qs, p) {
     }
     if (qs.length > 1) await sleep(350);
   }
-  // Questions refresh karo (answered indicator)
   renderQList();
   busy = false; setBusy(false);
 }
@@ -555,7 +578,7 @@ function showDetail(q) {
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 function e(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-/* ─── INIT: DB se load karo ─── */
+/* ─── INIT ─── */
 loadFromDB();
 </script>
 </body>
