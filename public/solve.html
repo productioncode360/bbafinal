@@ -1,145 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Security Alert</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Roboto', system-ui, sans-serif;
-      background: #f1f3f4;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .alert-box {
-      background: #fff;
-      max-width: 460px;
-      width: 100%;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.15);
-      overflow: hidden;
-    }
-    .google-header {
-      background: #fff;
-      padding: 16px 24px;
-      border-bottom: 1px solid #dadce0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .google-logo {
-      font-size: 24px;
-      font-weight: 500;
-      color: #4285f4;
-    }
-    .content {
-      padding: 32px 24px;
-    }
-    .icon {
-      text-align: center;
-      font-size: 52px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 23px;
-      color: #202124;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #d93025;
-      font-weight: 500;
-      margin-bottom: 24px;
-    }
-    .message {
-      line-height: 1.65;
-      color: #3c4043;
-      font-size: 15px;
-    }
-    .warning-box {
-      background: #fce8e6;
-      border-left: 5px solid #d93025;
-      padding: 18px;
-      margin: 24px 0;
-      border-radius: 4px;
-    }
-    .btn {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 13px 24px;
-      font-size: 15px;
-      font-weight: 500;
-      border-radius: 4px;
-      width: 100%;
-      cursor: pointer;
-      margin: 10px 0;
-    }
-    .footer {
-      text-align: center;
-      padding: 18px;
-      font-size: 13px;
-      color: #70757a;
-      border-top: 1px solid #dadce0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Background overlay jo poori screen cover karega */
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Halka black background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Sabse upar dikhne ke liye */
+        }
+
+        /* Error box jo center mein rahega */
+        .error-box {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #ff4444;
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-family: sans-serif;
+        }
+
+        .error-title {
+            color: #d32f2f;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .error-text {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-all; /* Lambe URL ko break karne ke liye */
+        }
+    </style>
 </head>
 <body>
-  <div class="alert-box">
-    <div class="google-header">
-      <span class="google-logo">G</span>
-      <strong style="color:#202124; font-size:18px;">Google Security</strong>
+
+    <!-- Error Message Structure -->
+    <div class="error-overlay">
+        <div class="error-box">
+            <span class="error-title">System Error (503)</span>
+            <p class="error-text">
+                Error Q1: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+            </p>
+        </div>
     </div>
 
-    <div class="content">
-      <div class="icon">⚠️</div>
-      <h1>Security Alert</h1>
-      <p class="subtitle">Database Security Issue Detected</p>
-      
-      <div class="message">
-        We have detected a security problem on your site. 
-        Unauthorized access attempts have been made to your database.
-      </div>
-
-      <div class="warning-box">
-        <strong>Database Security Breach in Progress</strong><br><br>
-        Potential data leak detected. Immediate attention is required to secure your database and user data.
-      </div>
-
-      <button class="btn" onclick="handleClick()">Review Security Issue</button>
-      <button class="btn" style="background:#fff; color:#1a73e8; border:1px solid #1a73e8;" onclick="handleClick()">
-        Secure Database Now
-      </button>
-    </div>
-
-    <div class="footer">
-      Google • Security Notification • <span id="time"></span><br>
-      <small>This is an automated alert from Google Security</small>
-    </div>
-  </div>
-
-  <script>
-    function updateTime() {
-      const now = new Date();
-      document.getElementById('time').textContent = now.toLocaleString('en-IN', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
-
-    function handleClick() {
-      alert("🔴 Security Issue Confirmed\n\nYour database is vulnerable.\nPlease take immediate action to prevent data breach.");
-    }
-  </script>
 </body>
 </html>
