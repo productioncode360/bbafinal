@@ -1,585 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Atheneum AI</title>
-<style>
-:root{--bg:#0f1117;--bg2:#161b25;--bg3:#1e2535;--bd:#2a3349;--ac:#4f7cff;--tx:#e8ecf4;--tx2:#8b95b0;--tx3:#555f7a;--gn:#22c97a;--rd:#ff5c5c;}
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-body{background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-.nav{height:46px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 14px;gap:6px;flex-shrink:0;}
-.logo{font-size:15px;font-weight:700;color:var(--ac);margin-right:10px;}
-.ntab{padding:5px 14px;border-radius:7px;border:none;background:transparent;color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;}
-.ntab:hover{background:var(--bg3);}
-.ntab.on{background:var(--ac);color:#fff;}
-.pill{margin-left:auto;padding:3px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;font-size:11px;color:var(--tx3);}
-.pill.has{color:var(--ac);border-color:var(--ac);}
-.pg{display:none;flex:1;overflow:hidden;}
-.pg.on{display:flex;}
-.sb{width:190px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;}
-.sb-hd{padding:12px 12px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
-.sb-ttl{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.7px;text-transform:uppercase;}
-.btn-plus{width:24px;height:24px;background:var(--ac);border:none;border-radius:6px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.sb-list{flex:1;overflow-y:auto;padding:6px;}
-.si{padding:9px 10px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx2);border:1px solid transparent;display:flex;align-items:center;gap:7px;margin-bottom:2px;}
-.si:hover{background:var(--bg3);}
-.si.on{background:rgba(79,124,255,.12);border-color:rgba(79,124,255,.3);color:var(--ac);}
-.si-nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.si-ct{font-size:9px;background:var(--bg3);padding:1px 5px;border-radius:6px;color:var(--tx3);}
-.empty{padding:20px 10px;text-align:center;font-size:11px;color:var(--tx3);line-height:1.7;}
-.qp{width:300px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;}
-.qp-hd{padding:11px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px;flex-shrink:0;}
-.qp-ttl{font-size:12px;font-weight:700;flex:1;}
-.btn-up{padding:4px 10px;background:var(--ac);border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
-.btn-up:disabled{background:var(--bg3);color:var(--tx3);cursor:not-allowed;}
-.scanning{padding:8px 12px;background:rgba(79,124,255,.08);border-bottom:1px solid var(--bd);font-size:11px;color:var(--ac);display:none;align-items:center;gap:7px;flex-shrink:0;}
-.scanning.on{display:flex;}
-.spin{animation:spin 1s linear infinite;display:inline-block;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.ql{flex:1;overflow-y:auto;}
-.qrow{padding:10px 12px;border-bottom:1px solid rgba(42,51,73,.5);cursor:pointer;display:flex;align-items:flex-start;gap:8px;}
-.qrow:hover{background:var(--bg3);}
-.qrow.conn{background:rgba(79,124,255,.07);border-left:3px solid var(--ac);}
-.qrow.answered{border-right:3px solid var(--gn);}
-.qnum{font-size:10px;font-weight:700;color:var(--tx3);background:var(--bg3);border-radius:4px;padding:2px 5px;flex-shrink:0;min-width:26px;text-align:center;}
-.qrow.conn .qnum{background:rgba(79,124,255,.2);color:var(--ac);}
-.qtxt{font-size:11.5px;line-height:1.5;color:var(--tx2);flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
-.qrow.conn .qtxt{color:var(--tx);}
-.abox{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.abox-hd{padding:11px 14px;border-bottom:1px solid var(--bd);font-size:11px;font-weight:700;color:var(--tx3);display:flex;align-items:center;gap:7px;flex-shrink:0;}
-.abox-body{flex:1;overflow-y:auto;padding:16px;}
-.aph{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:.25;gap:7px;text-align:center;}
-.aph-ic{font-size:30px;}
-.aph-tx{font-size:12px;color:var(--tx2);line-height:1.6;}
-.ablk{border-bottom:1px solid var(--bd);margin-bottom:4px;}
-.aq{padding:9px 12px;background:rgba(79,124,255,.07);border-left:3px solid var(--ac);font-size:11.5px;font-weight:700;color:var(--ac);line-height:1.4;}
-.aa{padding:12px 14px 16px;}
-.atopic{font-size:13px;font-weight:700;color:var(--ac);margin:16px 0 5px;padding-left:9px;border-left:3px solid var(--ac);}
-.apara{font-size:13px;line-height:1.85;color:var(--tx);margin:0 0 9px;}
-.cp{width:280px;background:var(--bg2);border-left:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;}
-.cp-hd{padding:11px 12px;border-bottom:1px solid var(--bd);font-size:11px;font-weight:700;color:var(--tx3);display:flex;align-items:center;gap:5px;flex-shrink:0;}
-.cc{background:var(--ac);color:#fff;font-size:9px;padding:1px 6px;border-radius:7px;}
-.msgs{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:7px;background:var(--bg);}
-.bbl{padding:8px 11px;border-radius:9px;font-size:11.5px;line-height:1.5;max-width:95%;word-wrap:break-word;}
-.bbl.ai{background:var(--bg3);color:var(--tx);align-self:flex-start;border:1px solid var(--bd);}
-.bbl.user{background:var(--ac);color:#fff;align-self:flex-end;}
-.bbl.think{background:rgba(245,197,24,.1);color:#f5c518;align-self:flex-start;font-style:italic;border:1px solid rgba(245,197,24,.2);}
-.inp-area{padding:9px 10px;border-top:1px solid var(--bd);background:var(--bg2);flex-shrink:0;}
-.inp-row{display:flex;gap:5px;margin-bottom:7px;}
-.cinp{flex:1;padding:8px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx);font-size:12px;outline:none;}
-.cinp:focus{border-color:var(--ac);}
-.cinp::placeholder{color:var(--tx3);}
-.bsend{width:32px;height:32px;background:var(--ac);border:none;border-radius:7px;color:#fff;font-size:13px;cursor:pointer;flex-shrink:0;}
-.bsend:disabled{background:var(--bg3);color:var(--tx3);cursor:not-allowed;}
-.btn-row{display:flex;gap:5px;}
-.bact{flex:1;padding:6px 8px;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;}
-.bact.bone{background:rgba(79,124,255,.15);color:var(--ac);border:1px solid rgba(79,124,255,.3);}
-.bact.ball{background:var(--gn);color:#0a1a12;}
-.bact.bstop{background:var(--rd);color:#fff;display:none;}
-.bact:disabled{opacity:.4;cursor:not-allowed;}
-.hint{font-size:10px;color:var(--tx3);text-align:center;padding:4px 0 0;}
-.sbq-hd{padding:11px 12px;border-bottom:1px solid var(--bd);font-size:12px;font-weight:700;flex-shrink:0;}
-.dbox{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.dph{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:.25;gap:8px;text-align:center;}
-.dcnt{flex:1;overflow-y:auto;padding:22px;}
-.dq{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--bd);line-height:1.5;}
-.dans .atopic{color:var(--ac);}
-.dans .apara{color:var(--tx2);}
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:999;}
-.mo.on{display:flex;}
-.mbox{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:22px;width:320px;display:flex;flex-direction:column;gap:12px;}
-.mbox h3{font-size:14px;font-weight:700;}
-.mbox input{width:100%;padding:9px 11px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx);font-size:13px;outline:none;}
-.mbox input:focus{border-color:var(--ac);}
-.mbtns{display:flex;gap:7px;justify-content:flex-end;}
-.mcancel{padding:7px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx2);font-size:12px;font-weight:600;cursor:pointer;}
-.mok{padding:7px 16px;background:var(--ac);border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
-#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bg3);border:1px solid var(--bd);color:var(--tx);padding:9px 18px;border-radius:9px;font-size:12px;font-weight:600;z-index:9999;transition:transform .3s;pointer-events:none;}
-#toast.on{transform:translateX(-50%) translateY(0);}
-#toast.ok{border-color:var(--gn);color:var(--gn);}
-#toast.err{border-color:var(--rd);color:var(--rd);}
-#toast.warn{border-color:#f5c518;color:#f5c518;}
-#loadOverlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:10px;}
-#loadOverlay .spin{font-size:24px;}
-#loadOverlay p{color:var(--tx2);font-size:13px;}
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Security Alert</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', system-ui, sans-serif;
+      background: #f1f3f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .alert-box {
+      background: #fff;
+      max-width: 460px;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .google-header {
+      background: #fff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .google-logo {
+      font-size: 24px;
+      font-weight: 500;
+      color: #4285f4;
+    }
+    .content {
+      padding: 32px 24px;
+    }
+    .icon {
+      text-align: center;
+      font-size: 52px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 23px;
+      color: #202124;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #d93025;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+    .message {
+      line-height: 1.65;
+      color: #3c4043;
+      font-size: 15px;
+    }
+    .warning-box {
+      background: #fce8e6;
+      border-left: 5px solid #d93025;
+      padding: 18px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 13px 24px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 4px;
+      width: 100%;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    .footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 13px;
+      color: #70757a;
+      border-top: 1px solid #dadce0;
+    }
+  </style>
 </head>
 <body>
-
-<!-- Loading overlay -->
-<div id="loadOverlay">
-  <span class="spin">⟳</span>
-  <p>DB se data load ho raha hai...</p>
-</div>
-
-<div id="toast"></div>
-
-<div class="mo" id="mo">
-  <div class="mbox">
-    <h3>New Subject</h3>
-    <input type="text" id="mi" placeholder="Subject naam..." maxlength="40" onkeydown="if(event.key==='Enter')doAdd()">
-    <div class="mbtns">
-      <button class="mcancel" onclick="closeMo()">Cancel</button>
-      <button class="mok" onclick="doAdd()">Add</button>
+  <div class="alert-box">
+    <div class="google-header">
+      <span class="google-logo">G</span>
+      <strong style="color:#202124; font-size:18px;">Google Security</strong>
     </div>
-  </div>
-</div>
 
-<div class="nav">
-  <div class="logo">🧠 Atheneum</div>
-  <button class="ntab on" id="nAI" onclick="goPg('AI')">AI</button>
-  <button class="ntab" id="nSub" onclick="goPg('Sub')">Subject</button>
-  <div class="pill" id="topPill">No subject</div>
-</div>
-
-<div class="pg on" id="pgAI">
-  <div class="sb">
-    <div class="sb-hd">
-      <span class="sb-ttl">Subjects</span>
-      <button class="btn-plus" onclick="openMo()">+</button>
-    </div>
-    <div class="sb-list" id="sList"><div class="empty">+ se subject add karo!</div></div>
-  </div>
-
-  <div class="qp">
-    <div class="qp-hd">
-      <span class="qp-ttl" id="qpTtl">Questions</span>
-      <button class="btn-up" id="btnUp" onclick="document.getElementById('fImg').click()" disabled>📎 Image</button>
-      <input type="file" id="fImg" accept="image/*" multiple style="display:none" onchange="onImg(event)">
-    </div>
-    <div class="scanning" id="scanBar"><span class="spin">⟳</span><span id="scanTxt">Scanning...</span></div>
-    <div class="ql" id="qList"><div class="empty">Subject select karo phir image upload karo.</div></div>
-  </div>
-
-  <div class="abox">
-    <div class="abox-hd">💬 AI ANSWERS <span id="abadge" style="display:none;background:rgba(79,124,255,.15);color:var(--ac);padding:2px 8px;border-radius:7px;font-size:9px;font-weight:700;"></span></div>
-    <div class="abox-body" id="aBody">
-      <div class="aph"><div class="aph-ic">🤖</div><div class="aph-tx">Question connect karo,<br>prompt do, bhejo!</div></div>
-    </div>
-  </div>
-
-  <div class="cp">
-    <div class="cp-hd">🔗 CHAT <span class="cc" id="cc">0</span></div>
-    <div class="msgs" id="msgs"><div class="bbl ai">Subject banao, image upload karo, question click karo, prompt bhejo!</div></div>
-    <div class="inp-area">
-      <div class="inp-row">
-        <input class="cinp" id="cinp" placeholder="Prompt likho..." onkeydown="if(event.key==='Enter')doSend()">
-        <button class="bsend" id="bSend" onclick="doSend()" disabled>&#x25BA;</button>
+    <div class="content">
+      <div class="icon">⚠️</div>
+      <h1>Security Alert</h1>
+      <p class="subtitle">Database Security Issue Detected</p>
+      
+      <div class="message">
+        We have detected a security problem on your site. 
+        Unauthorized access attempts have been made to your database.
       </div>
-      <div class="btn-row">
-        <button class="bact bone" id="bOne" onclick="doSend()" disabled>SEND</button>
-        <button class="bact ball" id="bAll" onclick="doAll()" disabled>ALL</button>
-        <button class="bact bstop" id="bStop" onclick="doStop()">STOP</button>
+
+      <div class="warning-box">
+        <strong>Database Security Breach in Progress</strong><br><br>
+        Potential data leak detected. Immediate attention is required to secure your database and user data.
       </div>
-      <div class="hint" id="hint">Question pe click karo</div>
+
+      <button class="btn" onclick="handleClick()">Review Security Issue</button>
+      <button class="btn" style="background:#fff; color:#1a73e8; border:1px solid #1a73e8;" onclick="handleClick()">
+        Secure Database Now
+      </button>
+    </div>
+
+    <div class="footer">
+      Google • Security Notification • <span id="time"></span><br>
+      <small>This is an automated alert from Google Security</small>
     </div>
   </div>
-</div>
 
-<div class="pg" id="pgSub">
-  <div class="sb">
-    <div class="sb-hd"><span class="sb-ttl">All Subjects</span></div>
-    <div class="sb-list" id="sbList"><div class="empty">AI page mein subjects add karo.</div></div>
-  </div>
-  <div class="qp">
-    <div class="sbq-hd" id="sbqHd">Questions</div>
-    <div class="ql" id="sbqList"><div class="empty">Subject choose karo.</div></div>
-  </div>
-  <div class="dbox" id="dbox">
-    <div class="dph"><div class="aph-ic">📖</div><div class="aph-tx">Question choose karo</div></div>
-  </div>
-</div>
-
-<script>
-var BE = '';
-var subs = {}, actSub = null, connId = null, busy = false, stopSig = false, hist = [], sbActSub = null;
-// ^^^^ connId = single ID (Set ki jagah ek string) — FIX #1
-var tTimer;
-
-/* ─── Toast ─── */
-function toast(m, t, d) {
-  d = d || 3000;
-  var el = document.getElementById('toast');
-  el.textContent = m; el.className = 'on' + (t ? ' ' + t : '');
-  clearTimeout(tTimer); tTimer = setTimeout(function () { el.className = ''; }, d);
-}
-
-/* ─── Page switch ─── */
-function goPg(p) {
-  document.querySelectorAll('.pg').forEach(function (e) { e.classList.remove('on'); });
-  document.querySelectorAll('.ntab').forEach(function (e) { e.classList.remove('on'); });
-  document.getElementById('pg' + p).classList.add('on');
-  document.getElementById('n' + p).classList.add('on');
-  if (p === 'Sub') syncSubPage();
-}
-
-/* ─── Modal ─── */
-function openMo() { document.getElementById('mo').classList.add('on'); setTimeout(function () { document.getElementById('mi').focus(); }, 80); }
-function closeMo() { document.getElementById('mo').classList.remove('on'); document.getElementById('mi').value = ''; }
-
-/* ─────────────────────────────────────────
-   DB se sab load karo (page load pe)
-───────────────────────────────────────── */
-async function loadFromDB() {
-  try {
-    var res = await fetch(BE + '/api/subjects');
-    var d = await res.json();
-    if (!d.success) throw new Error(d.error || 'Load fail');
-    subs = {};
-    d.subjects.forEach(function (s) {
-      subs[s.name] = { qs: s.questions.map(function (q) { return { id: q.id, text: q.text, ans: q.ans || '' }; }) };
-    });
-    renderSList();
-    toast('DB se ' + Object.keys(subs).length + ' subjects loaded!', 'ok');
-  } catch (err) {
-    toast('DB load fail: ' + err.message, 'err', 5000);
-  } finally {
-    document.getElementById('loadOverlay').style.display = 'none';
-  }
-}
-
-/* ─── Subject add ─── */
-async function doAdd() {
-  var nm = document.getElementById('mi').value.trim();
-  if (!nm) { toast('Naam dalo!', 'warn'); return; }
-  if (subs[nm]) { toast('Already hai!', 'warn'); return; }
-  try {
-    var res = await fetch(BE + '/api/subjects', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: nm })
-    });
-    var d = await res.json();
-    if (!d.success) throw new Error(d.error || 'Add fail');
-    subs[nm] = { qs: [] };
-    closeMo(); renderSList(); selSub(nm);
-    toast('"' + nm + '" add!', 'ok');
-  } catch (err) {
-    toast('Error: ' + err.message, 'err');
-  }
-}
-
-var ICONS = ['📚', '🌍', '🔢', '📖', '🧩', '🔬', '🏛️', '⚛️', '🎯', '📐', '🧬', '💡', '🏆', '🗺️', '🎓'];
-function icon(nm) { var h = 0; for (var i = 0; i < nm.length; i++) h = (h * 31 + nm.charCodeAt(i)) % ICONS.length; return ICONS[h]; }
-
-function renderSList() {
-  var el = document.getElementById('sList');
-  var ns = Object.keys(subs);
-  if (!ns.length) { el.innerHTML = '<div class="empty">+ se subject add karo!</div>'; return; }
-  el.innerHTML = '';
-  ns.forEach(function (nm) {
-    var d = document.createElement('div');
-    d.className = 'si' + (nm === actSub ? ' on' : '');
-    d.innerHTML = '<span>' + icon(nm) + '</span><span class="si-nm">' + e(nm) + '</span><span class="si-ct">' + subs[nm].qs.length + '</span>';
-    d.onclick = function () { selSub(nm); };
-    el.appendChild(d);
-  });
-}
-
-function selSub(nm) {
-  actSub = nm; connId = null; hist = [];
-  renderSList(); renderQList();
-  document.getElementById('qpTtl').textContent = icon(nm) + ' ' + nm;
-  document.getElementById('btnUp').disabled = false;
-  updPill(); updCtrl();
-  addBbl('ai', 'Selected: "' + nm + '"\nImage upload karo ya purane questions dekhlo!');
-}
-
-/* ─── Image upload ─── */
-function toB64(file) {
-  return new Promise(function (res, rej) {
-    var r = new FileReader();
-    r.onload = function () { res(r.result.split(',')[1]); };
-    r.onerror = function () { rej(new Error('Read fail')); };
-    r.readAsDataURL(file);
-  });
-}
-
-async function onImg(ev) {
-  var files = Array.from(ev.target.files);
-  if (!files.length || !actSub) return;
-  ev.target.value = '';
-  var bar = document.getElementById('scanBar'); bar.classList.add('on');
-  var added = 0;
-  for (var i = 0; i < files.length; i++) {
-    var f = files[i];
-    document.getElementById('scanTxt').textContent = 'Image ' + (i + 1) + '/' + files.length + ': "' + f.name + '"...';
-    try {
-      var b64 = await toB64(f);
-      var qs = await extractQs(b64, f.type);
-      var newQs = [];
-      qs.forEach(function (txt) {
-        if (!txt.trim()) return;
-        if (subs[actSub].qs.some(function (q) { return q.text === txt; })) return;
-        var q = { id: 'q' + Date.now() + Math.random().toString(36).slice(2, 6), text: txt, ans: '' };
-        subs[actSub].qs.push(q);
-        newQs.push(q);
-        added++;
+  <script>
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('time').textContent = now.toLocaleString('en-IN', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
       });
-      if (newQs.length) {
-        await fetch(BE + '/api/subjects/' + encodeURIComponent(actSub) + '/questions', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questions: newQs })
-        });
-      }
-      renderQList(); renderSList();
-      toast(qs.length + ' Qs from "' + f.name + '"', 'ok');
-    } catch (err) { toast(f.name + ': ' + err.message, 'err', 5000); }
-  }
-  bar.classList.remove('on');
-  if (added > 0) toast('Total ' + added + ' questions saved!', 'ok', 4000);
-}
-
-async function extractQs(b64, mime) {
-  var prompt = 'Is image mein jo questions hain unhe extract karo.\nHar question "Q:" se shuru karo, ek line ek question.\nMCQ ke options bhi saath likho.\nKoi extra text mat likho.\nAgar question nahi to "NONE" likho.';
-  var res = await fetch(BE + '/api/scan-pdf', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName: 'img', fileData: 'data:' + mime + ';base64,' + b64, prompt: prompt })
-  });
-  var d = await res.json();
-  if (!d.analysis) throw new Error(d.error || 'AI fail');
-  if (d.analysis.includes('NONE')) return [];
-  return d.analysis.split('\n').filter(function (l) { return l.trim().startsWith('Q:'); })
-    .map(function (l) { return l.replace(/^Q:\s*/, '').trim(); }).filter(function (t) { return t.length > 3; });
-}
-
-function renderQList() {
-  var el = document.getElementById('qList');
-  if (!actSub || !subs[actSub]) { el.innerHTML = '<div class="empty">Subject select karo.</div>'; return; }
-  var qs = subs[actSub].qs;
-  if (!qs.length) { el.innerHTML = '<div class="empty">Image upload karo.</div>'; return; }
-  el.innerHTML = '';
-  qs.forEach(function (q, i) {
-    var d = document.createElement('div');
-    // FIX #1: connId (single) se compare karo, Set nahi
-    var cls = 'qrow' + (connId === q.id ? ' conn' : '') + (q.ans ? ' answered' : '');
-    d.className = cls;
-    d.innerHTML = '<span class="qnum">' + (i + 1) + '</span><span class="qtxt">' + e(q.text) + '</span>';
-    d.onclick = function () { togConn(q.id); };
-    el.appendChild(d);
-  });
-  updCtrl();
-}
-
-/* ─── FIXED togConn: Single select only ─── */
-function togConn(id) {
-  var q = getQ(id);
-  if (connId === id) {
-    // Same question dobara click = disconnect
-    connId = null;
-    addBbl('ai', 'Disconnected: "' + q.text.slice(0, 40) + '"');
-  } else {
-    // Naya question click = purana auto-disconnect, naya connect
-    connId = id;
-    addBbl('ai', 'Connected: "' + q.text.slice(0, 50) + '"');
-  }
-  renderQList(); updCtrl();
-}
-
-function getQ(id) { return actSub && subs[actSub] ? subs[actSub].qs.find(function (q) { return q.id === id; }) : null; }
-
-// FIXED: connId single value se connected question
-function connQs() {
-  if (!actSub || !connId) return [];
-  var q = getQ(connId);
-  return q ? [q] : [];
-}
-
-function updCtrl() {
-  var n = connId ? 1 : 0;
-  document.getElementById('cc').textContent = n;
-  document.getElementById('bSend').disabled = n === 0;
-  document.getElementById('bOne').disabled = n === 0;
-  document.getElementById('bAll').disabled = !actSub || !subs[actSub] || !subs[actSub].qs.length;
-  document.getElementById('hint').textContent = n > 0 ? '1 connected — prompt do!' : 'Question pe click karo';
-}
-
-async function doSend() {
-  if (busy) return;
-  var p = document.getElementById('cinp').value.trim();
-  if (!p) { toast('Prompt likho!', 'warn'); return; }
-  var qs = connQs();
-  if (!qs.length) { toast('Question connect karo!', 'warn'); return; }
-  document.getElementById('cinp').value = '';
-  addBbl('user', p); await process(qs, p);
-}
-
-/* ─── FIXED doAll: Sirf unanswered questions process karo ─── */
-async function doAll() {
-  if (busy) return;
-  var p = document.getElementById('cinp').value.trim();
-  if (!p) { toast('Prompt likho!', 'warn'); return; }
-  if (!actSub || !subs[actSub].qs.length) { toast('Questions nahi!', 'warn'); return; }
-
-  // FIX #2: Only unanswered filter karo
-  var unanswered = subs[actSub].qs.filter(function (q) { return !q.ans; });
-
-  if (!unanswered.length) {
-    toast('Sab questions ke ans already aa chuke hain! ✅', 'ok', 4000);
-    return;
-  }
-
-  document.getElementById('cinp').value = '';
-  addBbl('user', p);
-  addBbl('ai', 'ALL (unanswered only) — ' + unanswered.length + ' questions process honge, ' + (subs[actSub].qs.length - unanswered.length) + ' already answered skip ho gaye ✅');
-  await process(unanswered, p);
-}
-
-async function process(qs, p) {
-  busy = true; stopSig = false; setBusy(true);
-  for (var i = 0; i < qs.length; i++) {
-    if (stopSig) { addBbl('ai', 'Stopped.'); break; }
-    var q = qs[i];
-    var tid = 't' + Date.now();
-    addBbl('think', 'Q' + (i + 1) + '/' + qs.length + '...', tid);
-    try {
-      var ans = await callAI(q, p);
-      var tel = document.getElementById(tid); if (tel) tel.remove();
-      q.ans = ans;
-      await saveAnswer(actSub, q.id, ans);
-      showAns(q.text, ans);
-      addBbl('ai', 'Q' + (i + 1) + ' done. ✅ Saved!');
-      hist.push({ role: 'user', content: p + ' [Q:' + q.text.slice(0, 50) + ']' });
-      hist.push({ role: 'assistant', content: ans.slice(0, 150) });
-      if (hist.length > 16) hist = hist.slice(-16);
-    } catch (err) {
-      var tel2 = document.getElementById(tid); if (tel2) tel2.remove();
-      addBbl('ai', 'Error Q' + (i + 1) + ': ' + err.message);
     }
-    if (qs.length > 1) await sleep(350);
-  }
-  renderQList();
-  busy = false; setBusy(false);
-}
+    setInterval(updateTime, 1000);
+    updateTime();
 
-async function saveAnswer(subName, qid, ans) {
-  try {
-    await fetch(BE + '/api/subjects/' + encodeURIComponent(subName) + '/questions/' + encodeURIComponent(qid), {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ans: ans })
-    });
-  } catch (err) {
-    console.error('Save answer fail:', err.message);
-  }
-}
-
-async function callAI(q, p) {
-  var wm = p.match(/(\d+)\s*(word|शब्द)/i);
-  var wc = wm ? parseInt(wm[1]) : 0;
-  var onlyPara = /only\s*para|sirf\s*para|only\s*paragraph|केवल\s*अनुच्छेद/i.test(p);
-  var fmt = '';
-  if (onlyPara) { fmt = 'FORMAT: Sirf paragraph mein likho. Koi topic heading mat do. Koi bullet point nahi.'; }
-  else if (wc >= 200) { fmt = 'FORMAT: 6-7 topics banao. Har topic ka naam alag line pe likho, phir uska ek paragraph.'; }
-  else if (wc >= 100) { fmt = 'FORMAT: 4-5 topics banao. Har topic ka naam alag line pe likho, phir uska ek paragraph.'; }
-  else if (wc > 0) { fmt = 'FORMAT: 2-3 topics banao. Har topic ka naam alag line pe likho, phir uska ek paragraph.'; }
-  else { fmt = 'FORMAT: 3-4 topics banao. Har topic ka naam alag line pe likho, phir uska ek paragraph.'; }
-
-  var prompt = 'Tu ek expert Hindi teacher hai.\n\nPrashna: ' + q.text + '\nNirdesh: ' + p + '\n\n' + fmt + '\n\nNiyam:\n- Sirf Hindi mein likho\n- Koi bullet point nahi, koi table nahi\n- Topic naam ek line, phir paragraph\n- Aasaan bhasha, exam ke liye';
-
-  var sl = hist.slice(-6); sl.push({ role: 'user', content: prompt });
-  var res = await fetch(BE + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: sl }) });
-  var d = await res.json();
-  if (!d.reply) throw new Error(d.error || 'AI fail');
-  return d.reply;
-}
-
-function doStop() { stopSig = true; busy = false; setBusy(false); }
-
-function setBusy(b) {
-  document.getElementById('bAll').style.display = b ? 'none' : '';
-  document.getElementById('bOne').style.display = b ? 'none' : '';
-  document.getElementById('bStop').style.display = b ? '' : 'none';
-  document.getElementById('bSend').disabled = b;
-}
-
-function showAns(q, a) {
-  var rb = document.getElementById('aBody');
-  var ph = rb.querySelector('.aph'); if (ph) ph.remove();
-  var blk = document.createElement('div'); blk.className = 'ablk';
-  blk.innerHTML = '<div class="aq">' + e(q) + '</div><div class="aa">' + fmt(a) + '</div>';
-  rb.appendChild(blk); rb.scrollTop = rb.scrollHeight;
-  var bg = document.getElementById('abadge'); bg.textContent = icon(actSub) + ' ' + actSub; bg.style.display = '';
-}
-
-function fmt(txt) {
-  var lines = txt.split('\n'), html = '', buf = [];
-  function flush() { if (buf.length) { html += '<p class="apara">' + buf.join(' ') + '</p>'; buf = []; } }
-  for (var i = 0; i < lines.length; i++) {
-    var ln = lines[i].trim();
-    if (!ln) { flush(); continue; }
-    var cl = ln.replace(/\*\*(.+?)\*\*/g, '$1');
-    var nxt = null;
-    for (var j = i + 1; j < lines.length; j++) { if (lines[j].trim()) { nxt = lines[j].trim(); break; } }
-    var isHd = cl.length <= 65 && !/[।\.]$/.test(cl) && !/^[•\-*\d]/.test(cl) && ((nxt && nxt.length > 60) || (!nxt && cl.length < 50));
-    if (isHd) { flush(); html += '<div class="atopic">' + e(cl) + '</div>'; }
-    else if (/^[•\-*] /.test(cl)) { flush(); html += '<p class="apara">' + e(cl.replace(/^[•\-*] /, '')) + '</p>'; }
-    else { buf.push(e(cl)); }
-  }
-  flush(); return html;
-}
-
-function addBbl(role, text, id) {
-  var c = document.getElementById('msgs');
-  var d = document.createElement('div'); d.className = 'bbl ' + role; d.innerText = text;
-  if (id) d.id = id; c.appendChild(d); c.scrollTop = c.scrollHeight;
-}
-
-function updPill() {
-  var p = document.getElementById('topPill');
-  if (actSub) { p.textContent = icon(actSub) + ' ' + actSub; p.classList.add('has'); }
-  else { p.textContent = 'No subject'; p.classList.remove('has'); }
-}
-
-/* ─── Subject Page ─── */
-function syncSubPage() {
-  var ns = Object.keys(subs);
-  var el = document.getElementById('sbList');
-  if (!ns.length) { el.innerHTML = '<div class="empty">AI page mein subjects add karo.</div>'; return; }
-  el.innerHTML = '';
-  ns.forEach(function (nm) {
-    var d = document.createElement('div');
-    d.className = 'si' + (nm === sbActSub ? ' on' : '');
-    d.innerHTML = '<span>' + icon(nm) + '</span><span class="si-nm">' + e(nm) + '</span>';
-    d.onclick = function () { selSbSub(nm); }; el.appendChild(d);
-  });
-  if (sbActSub && subs[sbActSub]) renderSbQs(sbActSub);
-}
-
-function selSbSub(nm) {
-  sbActSub = nm;
-  document.getElementById('sbqHd').textContent = icon(nm) + ' ' + nm;
-  syncSubPage(); renderSbQs(nm);
-  document.getElementById('dbox').innerHTML = '<div class="dph"><div class="aph-ic">📖</div><div class="aph-tx">Question choose karo</div></div>';
-}
-
-function renderSbQs(nm) {
-  var el = document.getElementById('sbqList');
-  var qs = subs[nm] ? subs[nm].qs : [];
-  if (!qs.length) { el.innerHTML = '<div class="empty">Koi question nahi.</div>'; return; }
-  el.innerHTML = '';
-  qs.forEach(function (q, i) {
-    var d = document.createElement('div');
-    d.className = 'qrow' + (q.ans ? ' answered' : '');
-    d.innerHTML = '<span class="qnum">' + (i + 1) + '</span><span class="qtxt">' + e(q.text) + '</span>';
-    d.onclick = function () { showDetail(q); }; el.appendChild(d);
-  });
-}
-
-function showDetail(q) {
-  var box = document.getElementById('dbox');
-  if (q.ans) {
-    box.innerHTML = '<div class="dcnt"><div class="dq">' + e(q.text) + '</div><div class="dans">' + fmt(q.ans) + '</div></div>';
-  } else {
-    box.innerHTML = '<div class="dcnt"><div class="dq">' + e(q.text) + '</div><div class="dans" style="color:var(--tx3);font-style:italic;">Answer nahi mila abhi.\nAI page pe jaao, connect karo, bhejo.</div></div>';
-  }
-}
-
-function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-function e(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-/* ─── INIT ─── */
-loadFromDB();
-</script>
+    function handleClick() {
+      alert("🔴 Security Issue Confirmed\n\nYour database is vulnerable.\nPlease take immediate action to prevent data breach.");
+    }
+  </script>
 </body>
 </html>
