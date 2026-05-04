@@ -1,61 +1,429 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        /* Background overlay jo poori screen cover karega */
-        .error-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8); /* Halka black background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999; /* Sabse upar dikhne ke liye */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solve — Atheneum</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0e18;
+  --bg2: #111520;
+  --bg3: #181d2e;
+  --bg4: #1f2640;
+  --bd: #252d46;
+  --ac: #5b8fff;
+  --ac2: #8eb4ff;
+  --gn: #34d399;
+  --tx: #e4eaf8;
+  --tx2: #8898c0;
+  --tx3: #4a567a;
+  --rd: #ff6b6b;
+  --nav-h: 54px;
+  --radius: 14px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--tx); font-family: 'DM Sans', sans-serif; overflow: hidden; }
 
-        /* Error box jo center mein rahega */
-        .error-box {
-            background-color: #fff;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 8px;
-            border-left: 5px solid #ff4444;
-            max-width: 500px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-family: sans-serif;
-        }
+/* ── NAV ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h);
+  background: rgba(11,14,24,.92); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 0; z-index: 100;
+  padding: 0 14px;
+}
+.nav-back {
+  width: 36px; height: 36px; border-radius: 10px; border: none;
+  background: var(--bg3); color: var(--tx2); cursor: pointer;
+  display: none; align-items: center; justify-content: center; font-size: 18px;
+  flex-shrink: 0; margin-right: 10px; transition: background .15s;
+}
+.nav-back:active { background: var(--bg4); }
+.nav-back.show { display: flex; }
+.nav-title {
+  font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700;
+  color: var(--tx); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nav-logo { color: var(--ac); margin-right: 4px; }
+.nav-badge {
+  font-size: 10px; background: var(--bg3); border: 1px solid var(--bd);
+  color: var(--tx3); padding: 2px 9px; border-radius: 20px; flex-shrink: 0;
+}
+.nav-badge.colored { background: rgba(91,143,255,.12); border-color: rgba(91,143,255,.35); color: var(--ac2); }
 
-        .error-title {
-            color: #d32f2f;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: block;
-        }
+/* ── PANEL SYSTEM ── */
+.panels { position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; overflow: hidden; }
+.panel {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  transform: translateX(0); transition: transform .32s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+  padding: 16px 14px 30px;
+}
+.panel.hidden-left  { transform: translateX(-100%); pointer-events: none; }
+.panel.hidden-right { transform: translateX(100%); pointer-events: none; }
 
-        .error-text {
-            color: #333;
-            font-size: 14px;
-            line-height: 1.5;
-            word-break: break-all; /* Lambe URL ko break karne ke liye */
-        }
-    </style>
+/* ── LOADING ── */
+.loader {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 60vh; gap: 14px; opacity: .5;
+}
+.spin-ring {
+  width: 36px; height: 36px; border: 3px solid var(--bd); border-top-color: var(--ac);
+  border-radius: 50%; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader p { font-size: 12px; color: var(--tx3); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 55vh; gap: 10px; opacity: .35;
+}
+.empty-state .ico { font-size: 38px; }
+.empty-state p { font-size: 12px; color: var(--tx2); text-align: center; line-height: 1.7; }
+
+/* ── SUBJECT CARDS ── */
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase;
+  color: var(--tx3); margin: 8px 2px 12px;
+}
+.sub-grid { display: flex; flex-direction: column; gap: 10px; }
+.sub-card {
+  background: var(--bg2); border: 1px solid var(--bd); border-radius: var(--radius);
+  padding: 16px 16px 14px; cursor: pointer; display: flex; align-items: center; gap: 14px;
+  transition: border-color .18s, background .18s, transform .12s;
+  position: relative; overflow: hidden;
+}
+.sub-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--ac); border-radius: 3px 0 0 3px;
+  transform: scaleY(0); transform-origin: center;
+  transition: transform .2s cubic-bezier(.4,0,.2,1);
+}
+.sub-card:active { transform: scale(.985); background: var(--bg3); }
+.sub-card:hover { border-color: rgba(91,143,255,.4); background: var(--bg3); }
+.sub-card:hover::before { transform: scaleY(1); }
+.sub-icon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+.sub-info { flex: 1; min-width: 0; }
+.sub-name {
+  font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--tx); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sub-meta { font-size: 11px; color: var(--tx3); display: flex; gap: 10px; align-items: center; }
+.sub-done { color: var(--gn); font-weight: 600; }
+.sub-arrow { font-size: 16px; color: var(--tx3); flex-shrink: 0; transition: transform .2s; }
+.sub-card:hover .sub-arrow { transform: translateX(3px); color: var(--ac); }
+
+/* ── QUESTION LIST ── */
+.q-list { display: flex; flex-direction: column; gap: 8px; }
+.q-item {
+  background: var(--bg2); border: 1px solid var(--bd); border-radius: var(--radius);
+  padding: 13px 14px; cursor: pointer; display: flex; align-items: flex-start; gap: 11px;
+  transition: border-color .15s, background .15s, transform .1s;
+  position: relative;
+}
+.q-item:active { transform: scale(.985); background: var(--bg3); }
+.q-item:hover { border-color: rgba(91,143,255,.35); background: var(--bg3); }
+.q-item.has-ans { border-left: 3px solid var(--gn); }
+.q-num {
+  font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700;
+  background: var(--bg3); border: 1px solid var(--bd); color: var(--tx3);
+  padding: 3px 7px; border-radius: 7px; flex-shrink: 0; margin-top: 1px;
+  min-width: 30px; text-align: center;
+}
+.q-item.has-ans .q-num { background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.3); color: var(--gn); }
+.q-text { font-size: 13px; line-height: 1.55; color: var(--tx2); flex: 1; }
+.q-item.has-ans .q-text { color: var(--tx); }
+.q-status { flex-shrink: 0; font-size: 13px; margin-top: 2px; }
+
+/* ── ANSWER VIEW ── */
+.ans-header { margin-bottom: 20px; }
+.ans-q {
+  background: rgba(91,143,255,.08); border: 1px solid rgba(91,143,255,.2);
+  border-left: 3px solid var(--ac); border-radius: var(--radius);
+  padding: 14px 16px; font-size: 14px; font-weight: 600; line-height: 1.55;
+  color: var(--ac2);
+}
+.ans-body { display: flex; flex-direction: column; gap: 18px; }
+.no-ans {
+  background: var(--bg2); border: 1px solid var(--bd); border-radius: var(--radius);
+  padding: 30px 20px; text-align: center; color: var(--tx3); font-size: 13px;
+  font-style: italic; line-height: 1.8;
+}
+.topic-block { }
+.topic-title {
+  font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--ac); margin-bottom: 8px; padding-left: 10px;
+  border-left: 3px solid var(--ac); line-height: 1.4;
+}
+.topic-para {
+  font-size: 14px; line-height: 1.9; color: var(--tx2); padding-left: 13px;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 3px; }
+
+/* ── ANIMATIONS ── */
+.sub-card, .q-item { animation: fadeUp .25s ease both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
 </head>
 <body>
 
-    <!-- Error Message Structure -->
-    <div class="error-overlay">
-        <div class="error-box">
-            <span class="error-title">System Error (503)</span>
-            <p class="error-text">
-                Error Q1: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-            </p>
-        </div>
-    </div>
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-back" id="navBack" onclick="goBack()">‹</button>
+  <div class="nav-title"><span class="nav-logo">🧠</span><span id="navTitle">Atheneum</span></div>
+  <div class="nav-badge" id="navBadge">Solve</div>
+</nav>
 
+<!-- PANELS -->
+<div class="panels">
+
+  <!-- Panel 1: Subjects -->
+  <div class="panel" id="pSubjects">
+    <div class="loader" id="loader">
+      <div class="spin-ring"></div>
+      <p>DB se data aa raha hai...</p>
+    </div>
+    <div id="subContent" style="display:none">
+      <div class="section-label">All Subjects</div>
+      <div class="sub-grid" id="subGrid"></div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Questions -->
+  <div class="panel hidden-right" id="pQuestions">
+    <div class="section-label" id="qLabel">Questions</div>
+    <div class="q-list" id="qList"></div>
+  </div>
+
+  <!-- Panel 3: Answer -->
+  <div class="panel hidden-right" id="pAnswer">
+    <div class="ans-header">
+      <div class="ans-q" id="ansQ"></div>
+    </div>
+    <div class="ans-body" id="ansBody"></div>
+  </div>
+
+</div>
+
+<script>
+var BE = '';  // same origin — server.js serve karega
+var subs = [];
+var curSub = null, curQ = null;
+var stack = ['subjects']; // navigation stack
+
+var ICONS = ['📚','🌍','🔢','📖','🧩','🔬','🏛️','⚛️','🎯','📐','🧬','💡','🏆','🗺️','🎓'];
+function icon(nm) {
+  var h = 0;
+  for (var i = 0; i < nm.length; i++) h = (h * 31 + nm.charCodeAt(i)) % ICONS.length;
+  return ICONS[h];
+}
+function e(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── NAV STATE ── */
+function setNav(title, badge, badgeColor, showBack) {
+  document.getElementById('navTitle').textContent = title;
+  var b = document.getElementById('navBadge');
+  b.textContent = badge;
+  b.className = 'nav-badge' + (badgeColor ? ' colored' : '');
+  var bk = document.getElementById('navBack');
+  if (showBack) bk.classList.add('show'); else bk.classList.remove('show');
+}
+
+/* ── PANEL TRANSITIONS ── */
+function showPanel(id, direction) {
+  // direction: 'forward' or 'back'
+  var panels = ['pSubjects','pQuestions','pAnswer'];
+  panels.forEach(function(pid) {
+    var el = document.getElementById(pid);
+    el.classList.remove('hidden-left','hidden-right');
+    if (pid === id) {
+      // visible
+    } else {
+      var idx = panels.indexOf(pid);
+      var cur = panels.indexOf(id);
+      if (direction === 'forward') {
+        el.classList.add(idx < cur ? 'hidden-left' : 'hidden-right');
+      } else {
+        el.classList.add(idx < cur ? 'hidden-left' : 'hidden-right');
+      }
+    }
+  });
+}
+
+/* ── LOAD DATA ── */
+async function loadData() {
+  try {
+    var res = await fetch('/api/subjects');
+    var d = await res.json();
+    if (!d.success) throw new Error(d.error);
+    subs = d.subjects;
+    renderSubjects();
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('subContent').style.display = 'block';
+    setNav('Atheneum', subs.length + ' Subjects', false, false);
+  } catch(err) {
+    document.getElementById('loader').innerHTML = '<div class="empty-state"><div class="ico">⚠️</div><p>Data load nahi hua.<br>' + err.message + '</p></div>';
+  }
+}
+
+/* ── RENDER SUBJECTS ── */
+function renderSubjects() {
+  var grid = document.getElementById('subGrid');
+  if (!subs.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="ico">📭</div><p>Koi subject nahi mila.<br>Pehle AI page pe add karo.</p></div>';
+    return;
+  }
+  grid.innerHTML = '';
+  subs.forEach(function(s, i) {
+    var total = s.questions.length;
+    var done = s.questions.filter(function(q){ return q.ans && q.ans.trim(); }).length;
+    var div = document.createElement('div');
+    div.className = 'sub-card';
+    div.style.animationDelay = (i * 0.05) + 's';
+    div.innerHTML =
+      '<div class="sub-icon">' + icon(s.name) + '</div>' +
+      '<div class="sub-info">' +
+        '<div class="sub-name">' + e(s.name) + '</div>' +
+        '<div class="sub-meta">' +
+          '<span>' + total + ' questions</span>' +
+          (done ? '<span class="sub-done">✓ ' + done + ' solved</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="sub-arrow">›</div>';
+    div.onclick = function(){ openSubject(s); };
+    grid.appendChild(div);
+  });
+}
+
+/* ── OPEN SUBJECT ── */
+function openSubject(s) {
+  curSub = s;
+  stack = ['subjects','questions'];
+
+  var label = document.getElementById('qLabel');
+  label.textContent = icon(s.name) + ' ' + s.name;
+
+  var list = document.getElementById('qList');
+  list.innerHTML = '';
+
+  if (!s.questions.length) {
+    list.innerHTML = '<div class="empty-state"><div class="ico">📝</div><p>Is subject mein koi question nahi.</p></div>';
+  } else {
+    s.questions.forEach(function(q, i) {
+      var hasAns = q.ans && q.ans.trim();
+      var div = document.createElement('div');
+      div.className = 'q-item' + (hasAns ? ' has-ans' : '');
+      div.style.animationDelay = (i * 0.04) + 's';
+      div.innerHTML =
+        '<div class="q-num">' + (i+1) + '</div>' +
+        '<div class="q-text">' + e(q.text) + '</div>' +
+        '<div class="q-status">' + (hasAns ? '✅' : '○') + '</div>';
+      div.onclick = function(){ openAnswer(q); };
+      list.appendChild(div);
+    });
+  }
+
+  setNav(s.name, s.questions.length + ' Qs', true, true);
+  showPanel('pQuestions', 'forward');
+}
+
+/* ── OPEN ANSWER ── */
+function openAnswer(q) {
+  curQ = q;
+  stack = ['subjects','questions','answer'];
+
+  document.getElementById('ansQ').textContent = q.text;
+
+  var body = document.getElementById('ansBody');
+  body.innerHTML = '';
+
+  if (!q.ans || !q.ans.trim()) {
+    body.innerHTML = '<div class="no-ans">❌ Answer abhi generate nahi hua.<br>AI page pe jaao, question select karo, prompt bhejo.</div>';
+  } else {
+    body.innerHTML = parseAns(q.ans);
+  }
+
+  setNav('Answer', curSub ? icon(curSub.name) + ' ' + curSub.name : 'Back', true, true);
+  showPanel('pAnswer', 'forward');
+}
+
+/* ── PARSE ANSWER ── */
+function parseAns(txt) {
+  var lines = txt.split('\n');
+  var html = '';
+  var buf = [];
+
+  function flush() {
+    if (buf.length) {
+      html += '<div class="topic-block"><p class="topic-para">' + buf.join(' ') + '</p></div>';
+      buf = [];
+    }
+  }
+
+  for (var i = 0; i < lines.length; i++) {
+    var ln = lines[i].trim();
+    if (!ln) { flush(); continue; }
+    var cl = ln.replace(/\*\*(.+?)\*\*/g, '$1');
+    var nxt = null;
+    for (var j = i+1; j < lines.length; j++) { if (lines[j].trim()) { nxt = lines[j].trim(); break; } }
+    var isHd = cl.length <= 65 && !/[।\.]$/.test(cl) && !/^[•\-*\d]/.test(cl) &&
+               ((nxt && nxt.length > 50) || (!nxt && cl.length < 50));
+    if (isHd) {
+      flush();
+      html += '<div class="topic-block"><div class="topic-title">' + e(cl) + '</div>';
+      // collect next paragraph into this block
+      var pBuf = [];
+      var k = i+1;
+      while (k < lines.length) {
+        var ln2 = lines[k].trim();
+        if (!ln2) { k++; break; }
+        if (ln2.length <= 65 && !/[।\.]$/.test(ln2) && !/^[•\-*\d]/.test(ln2)) { break; }
+        pBuf.push(e(ln2.replace(/\*\*(.+?)\*\*/g,'$1')));
+        k++;
+      }
+      if (pBuf.length) html += '<p class="topic-para">' + pBuf.join(' ') + '</p>';
+      html += '</div>';
+      i = k-1;
+    } else if (/^[•\-*] /.test(cl)) {
+      flush();
+      html += '<div class="topic-block"><p class="topic-para">• ' + e(cl.replace(/^[•\-*] /,'')) + '</p></div>';
+    } else {
+      buf.push(e(cl));
+    }
+  }
+  flush();
+  return html || '<div class="no-ans">Answer parse nahi hua.</div>';
+}
+
+/* ── GO BACK ── */
+function goBack() {
+  if (stack.length <= 1) return;
+  stack.pop();
+  var cur = stack[stack.length-1];
+
+  if (cur === 'subjects') {
+    setNav('Atheneum', subs.length + ' Subjects', false, false);
+    showPanel('pSubjects', 'back');
+  } else if (cur === 'questions' && curSub) {
+    setNav(curSub.name, curSub.questions.length + ' Qs', true, true);
+    showPanel('pQuestions', 'back');
+  }
+}
+
+/* ── HARDWARE BACK (Android) ── */
+window.addEventListener('popstate', function() { goBack(); });
+
+/* ── INIT ── */
+loadData();
+</script>
 </body>
 </html>
